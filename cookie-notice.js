@@ -1,4 +1,15 @@
 /**
+ * Implied Consent - jQuery Cookie Notice plugin
+ * self-contained version 0.1.x
+ *
+ * Copyright Dennis Publishing 2013
+ * Released under MIT license
+ *
+ * Display a cookie notice bar at the top of the page and set a cookie to
+ * prevent further display when any local link or the close button is clicked.
+ */
+
+/**
  * jQuery Quarantine - isolate jQuery
  *
  * https://github.com/quickredfox/jQuery-Quarantine
@@ -156,16 +167,6 @@ jQQ.isolate(function($) {
 });
 
 jQQ.isolate(function($) {
-
-  /**
-   * Implied Consent - jQuery Cookie Notice plugin - self-contained version v1.0-alpha
-   *
-   * Copyright Dennis Publishing 2013
-   * Released under MIT license
-   *
-   * Display a cookie notice bar at the top of the page and set a cookie to
-   * prevent further display when any local link or the close button is clicked.
-   */
   $.fn.cookieNotice = function(options) {
 
     // get hold of the div this plugin applies to
