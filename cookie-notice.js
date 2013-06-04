@@ -1,6 +1,6 @@
 /**
  * Implied Consent - jQuery Cookie Notice plugin
- * self-contained version 0.1.x
+ * self-contained version 0.1
  *
  * Copyright Dennis Publishing 2013
  * Released under MIT license
