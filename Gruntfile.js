@@ -3,10 +3,20 @@ module.exports = function(grunt) {
 
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
-
+    banner: '/*!\n'+
+            ' * Implied Consent - jQuery Cookie Notice plugin\n'+
+            ' * self-contained version <%= pkg.version %>\n'+
+            ' * \n'+
+            ' * Copyright Dennis Publishing\n'+
+            ' * Released under MIT license\n'+
+            ' * \n'+
+            ' * Display a cookie notice bar at the top of the page and set a cookie to\n'+
+            ' * prevent further display when any local link or the close button is clicked.\n'+
+            ' * <%= pkg.repository.url %>\n'+
+            ' */\n\n',
     concat: {
       options: {
-        separator: ';'
+        banner: '<%= banner %>'
       },
       dist: {
         src: [
@@ -19,17 +29,7 @@ module.exports = function(grunt) {
 
     uglify: {
       options: {
-        banner: '/*!\n'+
-                ' * Implied Consent - jQuery Cookie Notice plugin\n'+
-                ' * self-contained version <%= pkg.version %>\n'+
-                ' * \n'+
-                ' * Copyright Dennis Publishing\n'+
-                ' * Released under MIT license\n'+
-                ' * \n'+
-                ' * Display a cookie notice bar at the top of the page and set a cookie to\n'+
-                ' * prevent further display when any local link or the close button is clicked.\n'+
-                ' * <%= pkg.repository.url %>\n'+
-                ' */\n'
+        banner: '<%= banner %>'
       },
       dist: {
         files: {

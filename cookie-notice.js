@@ -1,3 +1,15 @@
+/*!
+ * Implied Consent - jQuery Cookie Notice plugin
+ * self-contained version 0.2.0
+ *
+ * Copyright Dennis Publishing
+ * Released under MIT license
+ *
+ * Display a cookie notice bar at the top of the page and set a cookie to
+ * prevent further display when any local link or the close button is clicked.
+ * https://github.com/dennisinteractive/implied-consent
+ */
+
 /**
  * jQuery Quarantine - isolate jQuery
  *
@@ -73,7 +85,8 @@ if(typeof window.jQQ !== 'object') {
 }
 
 jQQ.setup();
-;jQQ.isolate(function($) {
+
+jQQ.isolate(function($) {
   /**
    * jQuery Cookie Plugin v1.3.1
    * https://github.com/carhartl/jquery-cookie
@@ -162,9 +175,10 @@ jQQ.setup();
       return false;
     };
 });
-;/**
+
+/**
  * Implied Consent - jQuery Cookie Notice plugin
- * self-contained version 0.1
+ * self-contained version 0.2
  *
  * Copyright Dennis Publishing 2013
  * Released under MIT license
