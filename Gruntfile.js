@@ -1,19 +1,17 @@
 module.exports = function(grunt) {
-  "use strict";
+  'use strict';
 
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
+
     banner: '/*!\n'+
-            ' * Implied Consent - jQuery Cookie Notice plugin\n'+
+            ' * Implied Consent - a jQuery Cookie Notice plugin\n'+
             ' * self-contained version <%= pkg.version %>\n'+
             ' * \n'+
             ' * Copyright Dennis Publishing\n'+
             ' * Released under MIT license\n'+
-            ' * \n'+
-            ' * Display a cookie notice bar at the top of the page and set a cookie to\n'+
-            ' * prevent further display when any local link or the close button is clicked.\n'+
-            ' * <%= pkg.repository.url %>\n'+
-            ' */\n\n',
+            ' */\n',
+
     concat: {
       options: {
         banner: '<%= banner %>'
@@ -23,7 +21,7 @@ module.exports = function(grunt) {
          'src/includes/jquery.quarantine.js',
          'src/includes/jquery.cookie.js',
          'src/*.js'],
-        dest: 'cookie-notice.js'
+        dest: 'dist/<%= pkg.name %>.js'
       }
     },
 
@@ -33,28 +31,39 @@ module.exports = function(grunt) {
       },
       dist: {
         files: {
-          'cookie-notice.min.js': ['<%= concat.dist.dest %>']
+          'dist/<%= pkg.name %>.min.js': ['<%= concat.dist.dest %>']
         }
-      },
-    },
-    jshint: {
-      files: ['Gruntfile.js', 'src/cookie-notice.js'],
-      options: {
-        loopfunc: true,
-        strict: true
       }
     },
+
+    jshint: {
+      options: {
+        jshintrc : '.jshintrc',
+      },
+      files: [
+        'Gruntfile.js',
+        'src/<%= pkg.name %>.js'
+      ]
+    },
+
     watch: {
       files: ['src/**/*.js'],
-      tasks: ['jshint', 'concat', 'uglify']
+      tasks: ['jshint', 'concat', 'uglify', 'bytesize']
+    },
+
+    bytesize: {
+      dist: {
+        src: ['dist/<%= pkg.name %>.*']
+      }
     }
   });
 
+  grunt.loadNpmTasks('grunt-bytesize');
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-watch');
 
   grunt.registerTask('test', ['jshint']);
-  grunt.registerTask('default', ['jshint', 'concat', 'uglify']);
+  grunt.registerTask('default', ['jshint', 'concat', 'uglify', 'bytesize']);
 };

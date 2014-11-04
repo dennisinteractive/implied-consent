@@ -13,6 +13,18 @@ Upload the minified JS file to your CDN or web host of choice, change the path t
 
 Do not include the script directly from GitHub (http://raw.github.com/...). The file is being served as text/plain and as such being blocked in Internet Explorer on Windows 7 for instance (because of the wrong MIME type). Bottom line: GitHub is not a CDN.
 
+Add the following code to your page:
+
+```
+<script>
+jQQ.isolate(function($) {
+  $('body').prepend('<div id="__ic-notice"></div>');
+  $('#__ic-notice').impliedConsent();
+});
+</script>
+```
+
+
 License
 -------
 ### Copyright 2013 Dennis Publishing

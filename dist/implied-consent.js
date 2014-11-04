@@ -1,15 +1,10 @@
 /*!
- * Implied Consent - jQuery Cookie Notice plugin
- * self-contained version 0.2.0
- *
+ * Implied Consent - a jQuery Cookie Notice plugin
+ * self-contained version 0.3.0
+ * 
  * Copyright Dennis Publishing
  * Released under MIT license
- *
- * Display a cookie notice bar at the top of the page and set a cookie to
- * prevent further display when any local link or the close button is clicked.
- * https://github.com/dennisinteractive/implied-consent
  */
-
 /**
  * jQuery Quarantine - isolate jQuery
  *
@@ -176,22 +171,13 @@ jQQ.isolate(function($) {
     };
 });
 
-/**
- * Implied Consent - jQuery Cookie Notice plugin
- * self-contained version 0.2
- *
- * Copyright Dennis Publishing 2013
- * Released under MIT license
- *
- * Display a cookie notice bar at the top of the page and set a cookie to
- * prevent further display when any local link or the close button is clicked.
- */
 jQQ.isolate(function($) {
-  "use strict";
-  $.fn.cookieNotice = function(options) {
+  'use strict';
+
+  $.fn.impliedConsent = function(options) {
 
     // get hold of the div this plugin applies to
-    var cookieNoticeContainerId = $(this);
+    var noticeContainer = $(this);
     // set up the plugin defaults - these should be pretty sensible out of the box
     var settings = {
       'backgroundColor': '#222', // Container background color.
@@ -204,52 +190,29 @@ jQQ.isolate(function($) {
       'animate': true, // If false no animation will occur.
       'animationStyle': 'slideDown', // if you must then this works best
       'animationSpeed': 'slow',
-      'noticeText': 'We use cookies as set out in our <a href="http://www.dennis.co.uk/cookie-policy" target="_blank" title="Read more about our cookie policy">cookie policy</a>. By using this website, you agree we may place these cookies on your device.',
+      'noticeText': 'We use cookies as set out in our privacy policy. By using this website, you agree we may place these cookies on your device.',
       'confirmText': 'Close',
       'cookieExpiresIn': 365, // Defaults to one year, can be overridden
       'containerHeight': 0,
-      'cookieNamePrefix': 'dennisCookiesAccepted',
+      'cookieNamePrefix': '__ic_',
       'validateByClick': true
     };
 
     options = $.extend(settings, options);
 
     return this.each(function() {
-      var $this = $(this),
-        hostname = camelCase(window.location.hostname);
-
-      // check if cookie is already set by this plugin and if so show nothing
-      if ($.cookie && $.cookie(settings.cookieNamePrefix +'_'+ hostname) === 'true') {
-        $this.hide().remove();
-      }
-      else {
-        generate();
-        settings.containerHeight = $this.height();
-        $this.slideDown('slow');
-      }
-
-      // if button is clicked, set a cookie if jQuery.cookie is present and get rid
-      $('#dennis-cookienote-continue-button').bind('click', function() {
-        agree();
-      });
-      if (settings.validateByClick === true) {
-        $('a[href^="#"], a[href^="/"], a[href*="https://'+ window.location.hostname +'/"], a[href*="http://'+ window.location.hostname +'/"]').bind('click', function() {
-          agree();
-        });
-      }
-
       /**
        * Click on a local link or the button means agree, set the cookie, hide
        * the notice.
        */
       function agree() {
         if ($.cookie) {
-          $.cookie(settings.cookieNamePrefix +'_'+ hostname, 'true', { expires: settings.cookieExpiresIn, path: '/' });
+          $.cookie(settings.cookieNamePrefix + hostname, 'true', { expires: settings.cookieExpiresIn, path: '/' });
           if (settings.animate === true) {
-            $(cookieNoticeContainerId).slideUp(settings.animationSpeed);
+            $(noticeContainer).slideUp(settings.animationSpeed);
           }
           else {
-            $(cookieNoticeContainerId).hide();
+            $(noticeContainer).hide();
           }
         }
         else {
@@ -266,23 +229,25 @@ jQQ.isolate(function($) {
           backgroundColor: settings.backgroundColor,
           color: settings.textColor,
           fontSize: settings.fontSize,
-          fontFamily: settings.fontFamily
+          fontFamily: settings.fontFamily,
+          position: 'relative',
+          zIndex: 999999
         });
-        var containerDiv = '<div id="dennis-cookienote-container" style="position:relative;"></div>';
+        var containerDiv = '<style>#__ic-message > * { display: inline; }</style><div id="__ic-notice-container" style="position:relative;"></div>';
         $this.append(containerDiv);
 
         // Add/style notice text
-        var p = '<p style="margin:0; padding:8px; text-align:center;">'+ settings.noticeText +'</p>';
-        $('#dennis-cookienote-container').append(p);
+        var p = '<div id="__ic-message" style="margin:0; padding:8px; text-align:center;">'+ settings.noticeText +'</div>';
+        $('#__ic-notice-container').append(p);
         $this.find('a').css({
           color: settings.linkColor,
           textDecoration: 'none'
         });
 
         // Add/Style close button
-        var button = '<button type="button" id="dennis-cookienote-continue-button" title="'+ settings.confirmText +'">'+ settings.confirmText +'</button>';
-        $('#dennis-cookienote-container p').append(button);
-        $('#dennis-cookienote-container button').css({
+        var button = '<button type="button" id="__ic-continue-button" title="'+ settings.confirmText +'">'+ settings.confirmText +'</button>';
+        $('#__ic-message').append(button);
+        $('#__ic-continue-button').css({
           backgroundColor: settings.buttonBackgroundColor,
           color: settings.buttonColor,
           cursor: 'pointer',
@@ -299,15 +264,33 @@ jQQ.isolate(function($) {
        */
       function camelCase(input) {
         return input.toLowerCase().replace(/\.(.)/g, function(match, group1) {
-            return group1.toUpperCase();
+          return group1.toUpperCase();
+        });
+      }
+
+
+      var $this = $(this);
+      var hostname = camelCase(window.location.hostname);
+
+      // check if cookie is already set by this plugin and if so show nothing
+      if ($.cookie && $.cookie(settings.cookieNamePrefix + hostname) === 'true') {
+        $this.hide().remove();
+      }
+      else {
+        generate();
+        settings.containerHeight = $this.height();
+        $this.slideDown('slow');
+      }
+
+      // if button is clicked, set a cookie if jQuery.cookie is present and get rid
+      $('#__ic-continue-button').bind('click', function() {
+        agree();
+      });
+      if (settings.validateByClick === true) {
+        $('a[href^="#"], a[href^="/"], a[href*="https://'+ window.location.hostname +'/"], a[href*="http://'+ window.location.hostname +'/"]').bind('click', function() {
+          agree();
         });
       }
     });
   };
-});
-
-jQQ.isolate(function($) {
-  "use strict";
-  $('body').prepend('<div id="dennis-cookie-notice"></div>');
-  $('#dennis-cookie-notice').cookieNotice();
 });
