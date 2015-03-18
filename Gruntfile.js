@@ -5,22 +5,18 @@ module.exports = function(grunt) {
     pkg: grunt.file.readJSON('package.json'),
 
     banner: '/*!\n'+
-            ' * Implied Consent - a jQuery Cookie Notice plugin\n'+
-            ' * self-contained version <%= pkg.version %>\n'+
+            ' * Implied Consent version <%= pkg.version %> - <%= pkg.description %>\n' +
             ' * \n'+
-            ' * Copyright Dennis Publishing\n'+
-            ' * Released under MIT license\n'+
+            ' * Copyright Dennis Publishing\n' +
+            ' * Released under MIT license\n' +
             ' */\n',
 
-    concat: {
-      options: {
-        banner: '<%= banner %>'
-      },
+    browserify: {
       dist: {
-        src: [
-         'src/includes/jquery.quarantine.js',
-         'src/includes/jquery.cookie.js',
-         'src/*.js'],
+        options: {
+          transform: ['browserify-shim']
+        },
+        src: 'src/<%= pkg.name %>.js',
         dest: 'dist/<%= pkg.name %>.js'
       }
     },
@@ -31,7 +27,7 @@ module.exports = function(grunt) {
       },
       dist: {
         files: {
-          'dist/<%= pkg.name %>.min.js': ['<%= concat.dist.dest %>']
+          'dist/<%= pkg.name %>.min.js': ['<%= browserify.dist.dest %>']
         }
       }
     },
@@ -42,13 +38,13 @@ module.exports = function(grunt) {
       },
       files: [
         'Gruntfile.js',
-        'src/<%= pkg.name %>.js'
+        'src/**.js'
       ]
     },
 
     watch: {
-      files: ['src/**/*.js'],
-      tasks: ['jshint', 'concat', 'uglify', 'bytesize']
+      files: ['<%= jshint.files %>'],
+      tasks: ['default']
     },
 
     bytesize: {
@@ -58,12 +54,12 @@ module.exports = function(grunt) {
     }
   });
 
+  grunt.loadNpmTasks('grunt-browserify');
   grunt.loadNpmTasks('grunt-bytesize');
-  grunt.loadNpmTasks('grunt-contrib-concat');
-  grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-jshint');
+  grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-watch');
 
   grunt.registerTask('test', ['jshint']);
-  grunt.registerTask('default', ['jshint', 'concat', 'uglify', 'bytesize']);
+  grunt.registerTask('default', ['jshint', 'browserify', 'uglify', 'bytesize']);
 };
