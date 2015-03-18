@@ -1,123 +1,194 @@
-jQQ.isolate(function($) {
-  'use strict';
+(function(exports, undefined) {
 
-  $.fn.impliedConsent = function(options) {
+  // Some polyfills & shims.
+  require('eventlistener-polyfill');
+  require('prototype-indexof-shim');
+  var forEach = require('array-foreach');
+  Function.prototype.bind = require('function-bind');
 
-    // get hold of the div this plugin applies to
-    var noticeContainer = $(this);
-    // set up the plugin defaults - these should be pretty sensible out of the box
-    var settings = {
-      'backgroundColor': '#222', // Container background color.
-      'textColor': '#eee', // Text color in container.
-      'linkColor': '#acf', // Link color in container
-      'buttonBackgroundColor': '#555', // Button background color
-      'buttonColor': '#fff', // Button text color
-      'fontSize': 12,
-      'fontFamily': 'sans-serif',
-      'animate': true, // If false no animation will occur.
-      'animationStyle': 'slideDown', // if you must then this works best
-      'animationSpeed': 'slow',
-      'noticeText': 'We use cookies as set out in our privacy policy. By using this website, you agree we may place these cookies on your device.',
-      'confirmText': 'Close',
-      'cookieExpiresIn': 365, // Defaults to one year, can be overridden
-      'containerHeight': 0,
-      'cookieNamePrefix': '__ic_',
-      'validateByClick': true
-    };
+  // Other dependencies.
+  var aug = require('aug');
+  var Cookies = require('cookies-js');
+  var Delegate = require('dom-delegate');
 
-    options = $.extend(settings, options);
-
-    return this.each(function() {
-      /**
-       * Click on a local link or the button means agree, set the cookie, hide
-       * the notice.
-       */
-      function agree() {
-        if ($.cookie) {
-          $.cookie(settings.cookieNamePrefix + hostname, 'true', { expires: settings.cookieExpiresIn, path: '/' });
-          if (settings.animate === true) {
-            $(noticeContainer).slideUp(settings.animationSpeed);
-          }
-          else {
-            $(noticeContainer).hide();
-          }
-        }
-        else {
-          $.error('The jQuery.cookie plugin cannot be found!');
-        }
-      }
-
-      /**
-       * Generate and style the notice elements
-       */
-      function generate() {
-        // Element and container CSS
-        $this.css({
-          backgroundColor: settings.backgroundColor,
-          color: settings.textColor,
-          fontSize: settings.fontSize,
-          fontFamily: settings.fontFamily,
-          position: 'relative',
-          zIndex: 999999
-        });
-        var containerDiv = '<style>#__ic-message > * { display: inline; }</style><div id="__ic-notice-container" style="position:relative;"></div>';
-        $this.append(containerDiv);
-
-        // Add/style notice text
-        var p = '<div id="__ic-message" style="margin:0; padding:8px; text-align:center;">'+ settings.noticeText +'</div>';
-        $('#__ic-notice-container').append(p);
-        $this.find('a').css({
-          color: settings.linkColor,
-          textDecoration: 'none'
-        });
-
-        // Add/Style close button
-        var button = '<button type="button" id="__ic-continue-button" title="'+ settings.confirmText +'">'+ settings.confirmText +'</button>';
-        $('#__ic-message').append(button);
-        $('#__ic-continue-button').css({
-          backgroundColor: settings.buttonBackgroundColor,
-          color: settings.buttonColor,
-          cursor: 'pointer',
-          fontSize: settings.fontSize,
-          fontFamily: settings.fontFamily,
-          borderWidth: 0,
-          padding: '3px 6px',
-          marginLeft: 15
-        });
-      }
-
-      /**
-       * Helper function to convert a string to camel case along dots.
-       */
-      function camelCase(input) {
-        return input.toLowerCase().replace(/\.(.)/g, function(match, group1) {
-          return group1.toUpperCase();
-        });
-      }
-
-
-      var $this = $(this);
-      var hostname = camelCase(window.location.hostname);
-
-      // check if cookie is already set by this plugin and if so show nothing
-      if ($.cookie && $.cookie(settings.cookieNamePrefix + hostname) === 'true') {
-        $this.hide().remove();
-      }
-      else {
-        generate();
-        settings.containerHeight = $this.height();
-        $this.slideDown('slow');
-      }
-
-      // if button is clicked, set a cookie if jQuery.cookie is present and get rid
-      $('#__ic-continue-button').bind('click', function() {
-        agree();
-      });
-      if (settings.validateByClick === true) {
-        $('a[href^="#"], a[href^="/"], a[href*="https://'+ window.location.hostname +'/"], a[href*="http://'+ window.location.hostname +'/"]').bind('click', function() {
-          agree();
-        });
-      }
+  /**
+   * Helper function to convert a string to camel case along dots.
+   */
+  var camelCase = function(input) {
+    return input.toLowerCase().replace(/\.(.)/g, function(match, group1) {
+      return group1.toUpperCase();
     });
   };
-});
+
+  var escapeRegExp = function(str) {
+    return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&');
+  };
+
+  var defaults = {
+    backgroundColor: '#222', // Container background color.
+    textColor: '#eee', // Text color in container.
+    linkColor: '#acf', // Link color in container
+    buttonBackgroundColor: '#555', // Button background color
+    buttonColor: '#fff', // Button text color
+    fontSize: 12,
+    fontFamily: 'sans-serif',
+    animate: true, // If false no animation will occur.
+    animationStyle: 'slideDown', // if you must then this works best
+    animationSpeed: 'slow',
+    noticeText: 'We use cookies as set out in our privacy policy. By using this website, you agree we may place these cookies on your device.',
+    confirmText: 'Close',
+    cookieExpiresIn: 365, // Defaults to one year, can be overridden
+    containerHeight: 0,
+    cookieNamePrefix: '__ic_',
+    validateByClick: true
+  };
+  var hostname = camelCase(this.location.hostname);
+  var hostnamePattern = new RegExp('^https?:\/\/' + escapeRegExp(window.location.hostname));
+  var config;
+  var ic = {
+    delegate: null
+  };
+
+  ic.init = function(options) {
+    // Merge defaults with passed options.
+    config = aug(defaults, options);
+
+    // Set cookie defaults.
+    Cookies.defaults = {
+      path: '/',
+      expires: config.cookieExpiresIn * 24 * 60 * 60
+    };
+
+    if (Cookies.get(config.cookieNamePrefix + hostname) === undefined) {
+      render();
+    }
+  };
+
+  function validateByClick() {
+    ic.delegate = new Delegate(document);
+    // Specify the listener targets one by one to retain old IE8 compatibility.
+    ic.delegate.on('click', 'a', validateByClickHandler);
+    ic.delegate.on('click', 'button', validateByClickHandler);
+    ic.delegate.on('click', 'input', validateByClickHandler);
+  }
+
+  function validateByClickHandler(e) {
+    e.preventDefault();
+    switch (this.tagName) {
+      case 'A':
+        if (!!this.href.match(/^#/) || !!this.href.match(/^\//) || !!this.href.match(hostnamePattern)) {
+          return agree();
+        }
+        break;
+
+      case 'INPUT':
+        if (this.type === 'submit') {
+          return agree();
+        }
+        break;
+
+      case 'BUTTON':
+        return agree();
+    }
+  }
+
+  function buttonHandler() {
+    agree();
+  }
+
+  function agree() {
+    Cookies.set(config.cookieNamePrefix + hostname, 'true');
+    destroy();
+  }
+
+  function render() {
+    var css = '#__ic-message > * { display: inline; text-decoration: none; }';
+    var s = document.createElement('style');
+    var head = document.head || document.getElementsByTagName('head')[0];
+    var button = document.createElement('button');
+    var plug = document.createElement('p');
+    var box = document.createElement('div');
+    var body = document.body;
+    var b;
+
+    // Embed styles.
+    s.type = 'text/css';
+    if (s.styleSheet) {
+      s.styleSheet.cssText = css;
+    }
+    else {
+      s.appendChild(document.createTextNode(css));
+    }
+    head.appendChild(s);
+
+    // Create button.
+    button.style.backgroundColor = config.buttonBackgroundColor;
+    button.style.color = config.buttonColor;
+    button.style.cursor = 'pointer';
+    button.style.fontSize = config.fontSize;
+    button.style.fontFamily = config.fontFamily;
+    button.style.borderWidth = 0;
+    button.style.paddingTop = 3;
+    button.style.paddingBottom = 3;
+    button.style.paddingLeft = 6;
+    button.style.paddingRight = 6;
+    button.style.marginLeft = 15;
+    button.id = '__ic-continue-button';
+    button.title = config.confirmText;
+    button.innerText = config.confirmText;
+
+    // Create content.
+    plug.style.margin = 0;
+    plug.style.padding = 8;
+    plug.style.textAlign = 'center';
+    plug.innerText = config.noticeText;
+
+    // Create container.
+    box.id = '__ic-notice-container';
+    box.style.position = 'relative';
+    box.style.backgroundColor = config.backgroundColor,
+    box.style.color = config.textColor,
+    box.style.fontSize = config.fontSize,
+    box.style.fontFamily = config.fontFamily,
+    box.style.zIndex = 999999;
+
+    // Assemble and insert.
+    plug.appendChild(button);
+    box.appendChild(plug);
+    body = document.body;
+    body.insertBefore(box, body.firstChild);
+
+    // Set up click listener on the notice button.
+    b = document.querySelector('#__ic-continue-button');
+    b.addEventListener('click', buttonHandler);
+
+    // Add validate by click if set.
+    if (config.validateByClick) {
+      validateByClick();
+    }
+  }
+
+  function destroy() {
+    var button = document.querySelector('#__ic-continue-button');
+    button.removeEventListener('click', buttonHandler);
+    ic.delegate && ic.delegate.destroy();
+
+    // Destroy notice element.
+    var el = document.querySelector('#__ic-notice-container');
+    el.parentElement.removeChild(el);
+  }
+
+  // Process the queue.
+  if (this.impliedConsent && this.impliedConsent.q  && this.impliedConsent.q instanceof Array) {
+    forEach(this.impliedConsent.q, function(item) {
+      var op = item[0];
+      var args = item[1];
+      if (typeof ic[op] === 'function') {
+        ic[op].apply(this, [args]);
+      }
+    });
+  }
+
+  exports.impliedConsent = ic;
+
+}(typeof exports === 'object' && exports || this));
