@@ -59,7 +59,7 @@
 
     if (Cookies.get(config.cookieNamePrefix + hostname) === undefined) {
       domReady(function() {
-      render();
+        render();
       });
     }
   };
@@ -182,16 +182,30 @@
     el.parentElement.removeChild(el);
   }
 
-  // Process the queue.
-  if (this.impliedConsent && this.impliedConsent.q  && this.impliedConsent.q instanceof Array) {
-    forEach(this.impliedConsent.q, function(item) {
+  function init() {
+    // Set up command queue if not set already.
+    this.impliedConsent = this.impliedConsent || {};
+    this.impliedConsent.q = this.impliedConsent.q || [];
+
+    // Set any initial queue items aside.
+    var queue = this.impliedConsent.q;
+
+    // Implement our own push.
+    this.impliedConsent.q.push = function(item) {
       var op = item[0];
       var args = item[1];
       if (typeof ic[op] === 'function') {
         ic[op].apply(this, [args]);
       }
-    });
+    };
+
+    // Process initial queue items.
+    if (queue instanceof Array) {
+      forEach(queue, this.impliedConsent.q.push);
+    }
   }
+
+  init();
 
   exports.impliedConsent = ic;
 
