@@ -31,15 +31,12 @@
     linkColor: '#acf', // Link color in container
     buttonBackgroundColor: '#555', // Button background color
     buttonColor: '#fff', // Button text color
-    fontSize: 12,
+    fontSize: '12px',
     fontFamily: 'sans-serif',
-    animate: true, // If false no animation will occur.
-    animationStyle: 'slideDown', // if you must then this works best
-    animationSpeed: 'slow',
     noticeText: 'We use cookies as set out in our privacy policy. By using this website, you agree we may place these cookies on your device.',
     confirmText: 'Close',
     cookieExpiresIn: 365, // Defaults to one year, can be overridden
-    containerHeight: 0,
+    containerHeight: 0, // @todo implement setting the height.
     cookieNamePrefix: '__ic_',
     validateByClick: true
   };
@@ -105,14 +102,15 @@
   }
 
   function render() {
-    var css = '#__ic-message > * { display: inline; text-decoration: none; }';
+    var css = '#__ic-notice > * { display: inline; text-decoration: none; } #__ic-notice a, #__ic-notice a:link, #__ic-notice a:visited { color: ' + config.linkColor + '}';
     var s = document.createElement('style');
     var head = document.head || document.getElementsByTagName('head')[0];
     var button = document.createElement('button');
-    var plug = document.createElement('p');
-    var box = document.createElement('div');
+    var content = document.createElement('div');
+    var wrapper = document.createElement('div');
+    var container = document.createElement('div');
     var body = document.body;
-    var b;
+    var activeButton;
 
     // Embed styles.
     s.type = 'text/css';
@@ -125,45 +123,48 @@
     head.appendChild(s);
 
     // Create button.
+    button.id = '__ic-continue-button';
+    button.title = config.confirmText;
+    button.innerText = config.confirmText;
     button.style.backgroundColor = config.buttonBackgroundColor;
     button.style.color = config.buttonColor;
     button.style.cursor = 'pointer';
     button.style.fontSize = config.fontSize;
     button.style.fontFamily = config.fontFamily;
     button.style.borderWidth = 0;
-    button.style.paddingTop = 3;
-    button.style.paddingBottom = 3;
-    button.style.paddingLeft = 6;
-    button.style.paddingRight = 6;
-    button.style.marginLeft = 15;
-    button.id = '__ic-continue-button';
-    button.title = config.confirmText;
-    button.innerText = config.confirmText;
+    button.style.padding = '3px 6px';
+    button.style.marginLeft = '15px';
 
     // Create content.
-    plug.style.margin = 0;
-    plug.style.padding = 8;
-    plug.style.textAlign = 'center';
-    plug.innerText = config.noticeText;
+    content.innerHTML = config.noticeText;
+    content.id = '__ic-notice';
+    content.style.margin = 0;
+    content.style.padding = '8px';
+    content.style.textAlign = 'center';
 
     // Create container.
-    box.id = '__ic-notice-container';
-    box.style.position = 'relative';
-    box.style.backgroundColor = config.backgroundColor,
-    box.style.color = config.textColor,
-    box.style.fontSize = config.fontSize,
-    box.style.fontFamily = config.fontFamily,
-    box.style.zIndex = 999999;
+    container.id = '__ic-notice-container';
+    container.style.position = 'relative';
+
+    // Create wrapper.
+    wrapper.id = '__ic-notice';
+    wrapper.style.position = 'relative';
+    wrapper.style.backgroundColor = config.backgroundColor,
+    wrapper.style.color = config.textColor,
+    wrapper.style.fontSize = config.fontSize,
+    wrapper.style.fontFamily = config.fontFamily,
+    wrapper.style.zIndex = 999999;
 
     // Assemble and insert.
-    plug.appendChild(button);
-    box.appendChild(plug);
+    content.appendChild(button);
+    container.appendChild(content);
+    wrapper.appendChild(container);
     body = document.body;
-    body.insertBefore(box, body.firstChild);
+    body.insertBefore(wrapper, body.firstChild);
 
     // Set up click listener on the notice button.
-    b = document.querySelector('#__ic-continue-button');
-    b.addEventListener('click', buttonHandler);
+    activeButton = document.querySelector('#__ic-continue-button');
+    activeButton.addEventListener('click', buttonHandler);
 
     // Add validate by click if set.
     if (config.validateByClick) {
