@@ -14,10 +14,32 @@ module.exports = function(grunt) {
     browserify: {
       dist: {
         options: {
-          transform: ['browserify-shim']
+          transform: ['browserify-shim'],
         },
         src: 'src/<%= pkg.name %>.js',
         dest: 'dist/<%= pkg.name %>.js'
+      }
+    },
+
+    wrap: {
+      basic: {
+        options: {
+          wrapper: ['(function(f) { f() }(function(){var define,module,exports;return ', '}));'],
+          separator: '',
+        },
+        src: ['dist/<%= pkg.name %>.js'],
+        dest: './'
+      }
+    },
+
+    eol: {
+      dist: {
+        options: {
+          replace: true
+        },
+        files: {
+          src: ['dist/**']
+        }
       }
     },
 
@@ -59,7 +81,16 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-watch');
+  grunt.loadNpmTasks('grunt-eol');
+  grunt.loadNpmTasks('grunt-wrap');
 
   grunt.registerTask('test', ['jshint']);
-  grunt.registerTask('default', ['jshint', 'browserify', 'uglify', 'bytesize']);
+  grunt.registerTask('default', [
+    'jshint',
+    'browserify',
+    'wrap',
+    'eol',
+    'uglify',
+    'bytesize'
+  ]);
 };
