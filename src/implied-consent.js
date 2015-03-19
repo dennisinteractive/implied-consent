@@ -10,6 +10,7 @@
   var aug = require('aug');
   var Cookies = require('cookies-js');
   var Delegate = require('dom-delegate');
+  var domReady = require('domready');
 
   /**
    * Helper function to convert a string to camel case along dots.
@@ -60,7 +61,9 @@
     };
 
     if (Cookies.get(config.cookieNamePrefix + hostname) === undefined) {
+      domReady(function() {
       render();
+      });
     }
   };
 
