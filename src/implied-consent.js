@@ -140,8 +140,7 @@
    * Event handler to monitor page interaction and perform acknowledgement if
    * needed.
    */
-  function validateByClickHandler(e) {
-    e.preventDefault();
+  function validateByClickHandler() {
     switch (this.tagName) {
       case 'A':
         if (!!this.href.match(/^#/) || !!this.href.match(/^\//) || !!this.href.match(hostnamePattern)) {
