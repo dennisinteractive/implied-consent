@@ -3,12 +3,15 @@
 An implied consent notice to comply with the UK's implementation of the EU
 cookie laws (Note: this is not guaranteed to protect you!)
 
-It should work with a responsively designed site to adapt to mobile devices, or
-on a fixed-width site it'll stay fixed width.
+## Features
 
-From version 1.0.0 onwards the loading and execution of the script does not
+* __Responsive__: it should work with a responsively designed site to adapt to mobile devices, or
+on a fixed-width site it'll stay fixed width
+* __Asynchronous__: from version 1.0.0 onwards the loading and execution of the script does not
 block page loading and rendering as it is loaded and initialised in an
 asynchronous fashion.
+* __Lightweight__: The script is self-contained and has no external
+dependencies. It weighs only 5.35 kB when minified and gzipped.
 
 ## Installation / Usage
 
@@ -145,7 +148,7 @@ The build output files are located in the `dist/` folder.
 
 ## License
 
-### Copyright 2013 Dennis Publishing
+### Copyright 2015 Dennis Publishing
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
@@ -165,4 +168,3 @@ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
 LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-

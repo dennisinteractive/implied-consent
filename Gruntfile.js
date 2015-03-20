@@ -84,9 +84,11 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-eol');
   grunt.loadNpmTasks('grunt-wrap');
 
-  grunt.registerTask('test', ['jshint']);
+  grunt.registerTask('test', [
+    'jshint'
+  ]);
   grunt.registerTask('default', [
-    'jshint',
+    'test',
     'browserify',
     'wrap',
     'eol',
