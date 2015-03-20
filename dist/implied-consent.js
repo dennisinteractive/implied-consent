@@ -1255,6 +1255,8 @@ if (!Array.prototype.indexOf) {
     if (config.validateByClick) {
       validateByClick();
     }
+
+    ic.status = true;
   }
 
   /**
@@ -1268,6 +1270,7 @@ if (!Array.prototype.indexOf) {
     // Destroy notice element.
     var el = document.querySelector('#__ic-notice-container');
     el.parentElement.removeChild(el);
+    ic.status = false;
   }
 
   /**
@@ -1277,27 +1280,29 @@ if (!Array.prototype.indexOf) {
    * the `impliedConsent.q` array and by pushing the init comand into it.
    */
   function run() {
+    // Set context.
+    var root = (typeof window !== 'undefined') ? window : this;
+    var queue;
+
     // Set up command queue if not set already.
-    this.impliedConsent = this.impliedConsent || {};
-    this.impliedConsent.q = this.impliedConsent.q || [];
+    root.impliedConsent = root.impliedConsent || {};
+    root.impliedConsent.q = root.impliedConsent.q || [];
 
     // Set any initial queue items aside.
-    var queue = this.impliedConsent.q;
+    queue = root.impliedConsent.q;
 
     // Implement our own push.
-    this.impliedConsent.q.push = function(item) {
-      if (!(item instanceof Array) || !item[0]) {
-        return;
+    root.impliedConsent.q.push = function(item) {
+      if (ic.status || !(item instanceof Array) || !item[0] || typeof ic[item[0]] !== 'function') {
+        return false;
       }
-      if (typeof ic[item[0]] === 'function') {
-        var args = item[1] || {};
-        ic[item[0]].apply(this, [args]);
-      }
+      var args = item[1] || {};
+      ic[item[0]].apply(this, [args]);
     };
 
     // Process initial queue items.
     if (queue instanceof Array) {
-      forEach(queue, this.impliedConsent.q.push);
+      forEach(queue, root.impliedConsent.q.push);
     }
   }
 
