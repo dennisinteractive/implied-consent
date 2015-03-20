@@ -130,7 +130,18 @@ Type: `String` Default value: `sans-serif`
 
 CSS font-family value for text in the container.
 
+## Building from source
 
+Development is based on `npm`, `bower` and `grunt` so make sure you have these
+installed globally. Then install project dependencies:
+
+`npm install && bower install`
+
+Then run the build via
+
+`grunt`
+
+The build output files are located in the `dist/` folder.
 
 ## License
 
