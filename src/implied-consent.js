@@ -182,7 +182,7 @@
     el.parentElement.removeChild(el);
   }
 
-  function init() {
+  function run() {
     // Set up command queue if not set already.
     this.impliedConsent = this.impliedConsent || {};
     this.impliedConsent.q = this.impliedConsent.q || [];
@@ -192,10 +192,12 @@
 
     // Implement our own push.
     this.impliedConsent.q.push = function(item) {
-      var op = item[0];
-      var args = item[1];
-      if (typeof ic[op] === 'function') {
-        ic[op].apply(this, [args]);
+      if (!(item instanceof Array) || !item[0]) {
+        return;
+      }
+      if (typeof ic[item[0]] === 'function') {
+        var args = item[1] || {};
+        ic[item[0]].apply(this, [args]);
       }
     };
 
@@ -205,7 +207,7 @@
     }
   }
 
-  init();
+  run();
 
   exports.impliedConsent = ic;
 
