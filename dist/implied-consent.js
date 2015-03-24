@@ -1209,7 +1209,7 @@ if (!Array.prototype.indexOf) {
     // Create button.
     button.id = '__ic-continue-button';
     button.title = config.confirmText;
-    button.innerText = config.confirmText;
+    button.innerHTML = config.confirmText;
     button.style.backgroundColor = config.buttonBackgroundColor;
     button.style.color = config.buttonColor;
     button.style.cursor = 'pointer';
