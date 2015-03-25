@@ -7,11 +7,11 @@ cookie laws (Note: this is not guaranteed to protect you!)
 
 * __Responsive__: it should work with a responsively designed site to adapt to mobile devices, or
 on a fixed-width site it'll stay fixed width
-* __Asynchronous__: from version 1.0.0 onwards the loading and execution of the script does not
-block page loading and rendering as it is loaded and initialised in an
-asynchronous fashion.
+* __Asynchronous__: from version 1.0.0 onwards the loading and execution of the script is not blocking
+as it is loaded and initialised in an asynchronous fashion.
 * __Lightweight__: The script is self-contained and has no external
-dependencies. It weighs only 5.35 kB when minified and gzipped.
+dependencies. It weighs only 5.38 kB when minified and gzipped.
+* __Browser support__: This has been tested on IE8+ and all recent modern browsers.
 
 ## Installation / Usage
 
@@ -37,7 +37,18 @@ Add the following code to the head of your page:
 </script>
 ```
 
-It is possible to define custom configuration options:
+If only modern browsers are planned to be supported, load it via an asynchronous script tag:
+
+```js
+<script>
+  var impliedConsent = impliedConsent || {}; impliedConsent.q = impliedConsent.q || [];
+  impliedConsent.q.push(['init']);
+</script>
+
+<script async src="//example.com/implied-consent.min.js"></script>
+```
+
+It is possible to define custom configuration options in the `impliedConsent.q.push()` call:
 
 ```js
 impliedConsent.q.push(["init", {
@@ -145,6 +156,12 @@ Then run the build via
 `grunt`
 
 The build output files are located in the `dist/` folder.
+
+## Authors
+
+* Attila Beregszaszi
+* Will Howlett
+* Paul Lomax
 
 ## License
 
