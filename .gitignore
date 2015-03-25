@@ -45,7 +45,9 @@ intermediate
 publish
 .idea
 node_modules
+bower_components
 
 # build script local files
 build/buildinfo.properties
 build/config/buildinfo.properties
+npm-debug.log

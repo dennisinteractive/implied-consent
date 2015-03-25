@@ -17,8 +17,8 @@
   "trailing": true,
   "smarttabs": true,
   "globals": {
-    "module": true,
-    "jQuery": true,
-    "jQQ": true
+    "require": true,
+    "exports": true,
+    "module": true
   }
 }
