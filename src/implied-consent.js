@@ -226,6 +226,9 @@
     // Add validate by click if set.
     if (config.validateByClick) {
       validateByClick(wrapper);
+    } else {
+      var activeButton = document.getElementById('__ic-continue-button');
+      activeButton.addEventListener('click', agree);
     }
 
     ic.status = true;
