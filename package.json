@@ -2,7 +2,7 @@
   "name": "implied-consent",
   "description": "a Cookie Notice plugin",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.1.0",
   "license": "MIT",
   "main": "implied-consent.min.js",
   "ignore": [
@@ -11,23 +11,12 @@
     "test",
     "tests"
   ],
-  "browser": {
-    "eventlistener-polyfill": "./bower_components/eventlistener-polyfill/EventListener.js"
-  },
-  "browserify-shim": {
-    "eventlistener-polyfill": {
-      "exports": null
-    }
-  },
   "devDependencies": {
-    "array-foreach": "^1.0.1",
     "aug": "^0.1.0",
     "browserify": "^9.0.3",
-    "browserify-shim": "^3.8.3",
     "cookies-js": "^1.2.1",
     "dom-delegate": "^2.0.3",
     "domready": "^0.3.0",
-    "function-bind": "^1.0.2",
     "grunt": "~0.4.5",
     "grunt-browserify": "^3.5.0",
     "grunt-bytesize": "^0.1.1",
@@ -36,8 +25,7 @@
     "grunt-contrib-uglify": "~0.8.0",
     "grunt-contrib-watch": "~0.6.1",
     "grunt-eol": "^0.2.0",
-    "grunt-wrap": "^0.3.0",
-    "prototype-indexof-shim": "^1.0.0"
+    "grunt-wrap": "^0.3.0"
   },
   "repository": {
     "type": "git",
