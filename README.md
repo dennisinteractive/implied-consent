@@ -150,10 +150,10 @@ CSS font-family value for text in the container.
 
 ## Building from source
 
-Development is based on `npm`, `bower` and `grunt` so make sure you have these
+Development is based on `npm` and `grunt` so make sure you have these
 installed globally. Then install project dependencies:
 
-`npm install && bower install`
+`npm install`
 
 Then run the build via
 
