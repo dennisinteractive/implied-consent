@@ -11,7 +11,11 @@ on a fixed-width site it'll stay fixed width
 as it is loaded and initialised in an asynchronous fashion.
 * __Lightweight__: The script is self-contained and has no external
 dependencies. It weighs only 5.38 kB when minified and gzipped.
-* __Browser support__: This has been tested on IE8+ and all recent modern browsers.
+* __Browser support__: This has been tested on IE9+ and all recent modern browsers.
+
+## v1.1.0 Changes
+In this version, legacy polyfills for older browsers (IE8 and below) were removed to reduce file size and 
+prevent the polyfills from interfering with native browser APIs.
 
 ## Installation / Usage
 
@@ -146,10 +150,10 @@ CSS font-family value for text in the container.
 
 ## Building from source
 
-Development is based on `npm`, `bower` and `grunt` so make sure you have these
+Development is based on `npm` and `grunt` so make sure you have these
 installed globally. Then install project dependencies:
 
-`npm install && bower install`
+`npm install`
 
 Then run the build via
 

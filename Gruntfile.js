@@ -13,9 +13,6 @@ module.exports = function(grunt) {
 
     browserify: {
       dist: {
-        options: {
-          transform: ['browserify-shim'],
-        },
         src: 'src/<%= pkg.name %>.js',
         dest: 'dist/<%= pkg.name %>.js'
       }

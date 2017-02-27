@@ -1,179 +1,4 @@
 (function(f) { f() }(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-(function (global){
-;__browserify_shim_require__=require;(function browserifyShim(module, define, require) {
-// EventListener | MIT/GPL2 | github.com/jonathantneal/EventListener
-
-this.Element && Element.prototype.attachEvent && !Element.prototype.addEventListener && (function () {
-	function addToPrototype(name, method) {
-		Window.prototype[name] = HTMLDocument.prototype[name] = Element.prototype[name] = method;
-	}
-
-	// add
-	addToPrototype("addEventListener", function (type, listener) {
-		var
-		target = this,
-		listeners = target.addEventListener.listeners = target.addEventListener.listeners || {},
-		typeListeners = listeners[type] = listeners[type] || [];
-
-		// if no events exist, attach the listener
-		if (!typeListeners.length) {
-			target.attachEvent("on" + type, typeListeners.event = function (event) {
-				var documentElement = target.document && target.document.documentElement || target.documentElement || { scrollLeft: 0, scrollTop: 0 };
-
-				// polyfill w3c properties and methods
-				event.currentTarget = target;
-				event.pageX = event.clientX + documentElement.scrollLeft;
-				event.pageY = event.clientY + documentElement.scrollTop;
-				event.preventDefault = function () { event.returnValue = false };
-				event.relatedTarget = event.fromElement || null;
-				event.stopImmediatePropagation = function () { immediatePropagation = false; event.cancelBubble = true };
-				event.stopPropagation = function () { event.cancelBubble = true };
-				event.target = event.srcElement || target;
-				event.timeStamp = +new Date;
-
-				// create an cached list of the master events list (to protect this loop from breaking when an event is removed)
-				for (var i = 0, typeListenersCache = [].concat(typeListeners), typeListenerCache, immediatePropagation = true; immediatePropagation && (typeListenerCache = typeListenersCache[i]); ++i) {
-					// check to see if the cached event still exists in the master events list
-					for (var ii = 0, typeListener; typeListener = typeListeners[ii]; ++ii) {
-						if (typeListener == typeListenerCache) {
-							typeListener.call(target, event);
-
-							break;
-						}
-					}
-				}
-			});
-		}
-
-		// add the event to the master event list
-		typeListeners.push(listener);
-	});
-
-	// remove
-	addToPrototype("removeEventListener", function (type, listener) {
-		var
-		target = this,
-		listeners = target.addEventListener.listeners = target.addEventListener.listeners || {},
-		typeListeners = listeners[type] = listeners[type] || [];
-
-		// remove the newest matching event from the master event list
-		for (var i = typeListeners.length - 1, typeListener; typeListener = typeListeners[i]; --i) {
-			if (typeListener == listener) {
-				typeListeners.splice(i, 1);
-
-				break;
-			}
-		}
-
-		// if no events exist, detach the listener
-		if (!typeListeners.length && typeListeners.event) {
-			target.detachEvent("on" + type, typeListeners.event);
-		}
-	});
-
-	// dispatch
-	addToPrototype("dispatchEvent", function (eventObject) {
-		var
-		target = this,
-		type = eventObject.type,
-		listeners = target.addEventListener.listeners = target.addEventListener.listeners || {},
-		typeListeners = listeners[type] = listeners[type] || [];
-
-		try {
-			return target.fireEvent("on" + type, eventObject);
-		} catch (error) {
-			if (typeListeners.event) {
-				typeListeners.event(eventObject);
-			}
-
-			return;
-		}
-	});
-
-	// CustomEvent
-	Object.defineProperty(Window.prototype, "CustomEvent", {
-		get: function () {
-			var self = this;
-
-			return function CustomEvent(type, eventInitDict) {
-				var event = self.document.createEventObject(), key;
-
-				event.type = type;
-				for (key in eventInitDict) {
-					if (key == 'cancelable'){
-						event.returnValue = !eventInitDict.cancelable;
-					} else if (key == 'bubbles'){
-						event.cancelBubble = !eventInitDict.bubbles;
-					} else if (key == 'detail'){
-						event.detail = eventInitDict.detail;
-					}
-				}
-				return event;
-			};
-		}
-	});
-
-	// ready
-	function ready(event) {
-		if (ready.interval && document.body) {
-			ready.interval = clearInterval(ready.interval);
-
-			document.dispatchEvent(new CustomEvent("DOMContentLoaded"));
-		}
-	}
-
-	ready.interval = setInterval(ready, 1);
-
-	window.addEventListener("load", ready);
-})();
-
-!this.CustomEvent && (function() {
-	// CustomEvent for browsers which don't natively support the Constructor method
-	window.CustomEvent = function CustomEvent(type, eventInitDict) {
-		var event;
-		eventInitDict = eventInitDict || {bubbles: false, cancelable: false, detail: undefined};
-
-		try {
-			event = document.createEvent('CustomEvent');
-			event.initCustomEvent(type, eventInitDict.bubbles, eventInitDict.cancelable, eventInitDict.detail);
-		} catch (error) {
-			// for browsers which don't support CustomEvent at all, we use a regular event instead
-			event = document.createEvent('Event');
-			event.initEvent(type, eventInitDict.bubbles, eventInitDict.cancelable);
-			event.detail = eventInitDict.detail;
-		}
-
-		return event;
-	};
-})();
-}).call(global, module, undefined, undefined);
-
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],2:[function(require,module,exports){
-/**
- * array-foreach
- *   Array#forEach ponyfill for older browsers
- *   (Ponyfill: A polyfill that doesn't overwrite the native method)
- * 
- * https://github.com/twada/array-foreach
- *
- * Copyright (c) 2015 Takuto Wada
- * Licensed under the MIT license.
- *   http://twada.mit-license.org/
- */
-'use strict';
-
-module.exports = function forEach (ary, callback, thisArg) {
-    if (ary.forEach) {
-        ary.forEach(callback, thisArg);
-        return;
-    }
-    for (var i = 0; i < ary.length; i+=1) {
-        callback.call(thisArg, ary[i], i, ary);
-    }
-};
-
-},{}],3:[function(require,module,exports){
 (function(root) {
 
 var aug = function __aug() {
@@ -213,9 +38,9 @@ if (typeof module !== 'undefined') {
 
 }(this));
 
-},{}],4:[function(require,module,exports){
+},{}],2:[function(require,module,exports){
 /*
- * Cookies.js - 1.2.1
+ * Cookies.js - 1.2.3
  * https://github.com/ScottHamper/Cookies
  *
  * This is free and unencumbered software released into the public domain.
@@ -251,8 +76,10 @@ if (typeof module !== 'undefined') {
             if (Cookies._cachedDocumentCookie !== Cookies._document.cookie) {
                 Cookies._renewCache();
             }
+            
+            var value = Cookies._cache[Cookies._cacheKeyPrefix + key];
 
-            return Cookies._cache[Cookies._cacheKeyPrefix + key];
+            return value === undefined ? undefined : decodeURIComponent(value);
         };
 
         Cookies.set = function (key, value, options) {
@@ -335,9 +162,19 @@ if (typeof module !== 'undefined') {
             // IE omits the "=" when the cookie value is an empty string
             separatorIndex = separatorIndex < 0 ? cookieString.length : separatorIndex;
 
+            var key = cookieString.substr(0, separatorIndex);
+            var decodedKey;
+            try {
+                decodedKey = decodeURIComponent(key);
+            } catch (e) {
+                if (console && typeof console.error === 'function') {
+                    console.error('Could not decode cookie with key "' + key + '"', e);
+                }
+            }
+            
             return {
-                key: decodeURIComponent(cookieString.substr(0, separatorIndex)),
-                value: decodeURIComponent(cookieString.substr(separatorIndex + 1))
+                key: decodedKey,
+                value: cookieString.substr(separatorIndex + 1) // Defer decoding value until accessed
             };
         };
 
@@ -357,8 +194,7 @@ if (typeof module !== 'undefined') {
 
         return Cookies;
     };
-
-    var cookiesExport = typeof global.document === 'object' ? factory(global) : factory;
+    var cookiesExport = (global && typeof global.document === 'object') ? factory(global) : factory;
 
     // AMD support
     if (typeof define === 'function' && define.amd) {
@@ -375,459 +211,7 @@ if (typeof module !== 'undefined') {
         global.Cookies = cookiesExport;
     }
 })(typeof window === 'undefined' ? this : window);
-},{}],5:[function(require,module,exports){
-/*jshint browser:true, node:true*/
-
-'use strict';
-
-module.exports = Delegate;
-
-/**
- * DOM event delegator
- *
- * The delegator will listen
- * for events that bubble up
- * to the root node.
- *
- * @constructor
- * @param {Node|string} [root] The root node or a selector string matching the root node
- */
-function Delegate(root) {
-
-  /**
-   * Maintain a map of listener
-   * lists, keyed by event name.
-   *
-   * @type Object
-   */
-  this.listenerMap = [{}, {}];
-  if (root) {
-    this.root(root);
-  }
-
-  /** @type function() */
-  this.handle = Delegate.prototype.handle.bind(this);
-}
-
-/**
- * Start listening for events
- * on the provided DOM element
- *
- * @param  {Node|string} [root] The root node or a selector string matching the root node
- * @returns {Delegate} This method is chainable
- */
-Delegate.prototype.root = function(root) {
-  var listenerMap = this.listenerMap;
-  var eventType;
-
-  // Remove master event listeners
-  if (this.rootElement) {
-    for (eventType in listenerMap[1]) {
-      if (listenerMap[1].hasOwnProperty(eventType)) {
-        this.rootElement.removeEventListener(eventType, this.handle, true);
-      }
-    }
-    for (eventType in listenerMap[0]) {
-      if (listenerMap[0].hasOwnProperty(eventType)) {
-        this.rootElement.removeEventListener(eventType, this.handle, false);
-      }
-    }
-  }
-
-  // If no root or root is not
-  // a dom node, then remove internal
-  // root reference and exit here
-  if (!root || !root.addEventListener) {
-    if (this.rootElement) {
-      delete this.rootElement;
-    }
-    return this;
-  }
-
-  /**
-   * The root node at which
-   * listeners are attached.
-   *
-   * @type Node
-   */
-  this.rootElement = root;
-
-  // Set up master event listeners
-  for (eventType in listenerMap[1]) {
-    if (listenerMap[1].hasOwnProperty(eventType)) {
-      this.rootElement.addEventListener(eventType, this.handle, true);
-    }
-  }
-  for (eventType in listenerMap[0]) {
-    if (listenerMap[0].hasOwnProperty(eventType)) {
-      this.rootElement.addEventListener(eventType, this.handle, false);
-    }
-  }
-
-  return this;
-};
-
-/**
- * @param {string} eventType
- * @returns boolean
- */
-Delegate.prototype.captureForType = function(eventType) {
-  return ['blur', 'error', 'focus', 'load', 'resize', 'scroll'].indexOf(eventType) !== -1;
-};
-
-/**
- * Attach a handler to one
- * event for all elements
- * that match the selector,
- * now or in the future
- *
- * The handler function receives
- * three arguments: the DOM event
- * object, the node that matched
- * the selector while the event
- * was bubbling and a reference
- * to itself. Within the handler,
- * 'this' is equal to the second
- * argument.
- *
- * The node that actually received
- * the event can be accessed via
- * 'event.target'.
- *
- * @param {string} eventType Listen for these events
- * @param {string|undefined} selector Only handle events on elements matching this selector, if undefined match root element
- * @param {function()} handler Handler function - event data passed here will be in event.data
- * @param {Object} [eventData] Data to pass in event.data
- * @returns {Delegate} This method is chainable
- */
-Delegate.prototype.on = function(eventType, selector, handler, useCapture) {
-  var root, listenerMap, matcher, matcherParam;
-
-  if (!eventType) {
-    throw new TypeError('Invalid event type: ' + eventType);
-  }
-
-  // handler can be passed as
-  // the second or third argument
-  if (typeof selector === 'function') {
-    useCapture = handler;
-    handler = selector;
-    selector = null;
-  }
-
-  // Fallback to sensible defaults
-  // if useCapture not set
-  if (useCapture === undefined) {
-    useCapture = this.captureForType(eventType);
-  }
-
-  if (typeof handler !== 'function') {
-    throw new TypeError('Handler must be a type of Function');
-  }
-
-  root = this.rootElement;
-  listenerMap = this.listenerMap[useCapture ? 1 : 0];
-
-  // Add master handler for type if not created yet
-  if (!listenerMap[eventType]) {
-    if (root) {
-      root.addEventListener(eventType, this.handle, useCapture);
-    }
-    listenerMap[eventType] = [];
-  }
-
-  if (!selector) {
-    matcherParam = null;
-
-    // COMPLEX - matchesRoot needs to have access to
-    // this.rootElement, so bind the function to this.
-    matcher = matchesRoot.bind(this);
-
-  // Compile a matcher for the given selector
-  } else if (/^[a-z]+$/i.test(selector)) {
-    matcherParam = selector;
-    matcher = matchesTag;
-  } else if (/^#[a-z0-9\-_]+$/i.test(selector)) {
-    matcherParam = selector.slice(1);
-    matcher = matchesId;
-  } else {
-    matcherParam = selector;
-    matcher = matches;
-  }
-
-  // Add to the list of listeners
-  listenerMap[eventType].push({
-    selector: selector,
-    handler: handler,
-    matcher: matcher,
-    matcherParam: matcherParam
-  });
-
-  return this;
-};
-
-/**
- * Remove an event handler
- * for elements that match
- * the selector, forever
- *
- * @param {string} [eventType] Remove handlers for events matching this type, considering the other parameters
- * @param {string} [selector] If this parameter is omitted, only handlers which match the other two will be removed
- * @param {function()} [handler] If this parameter is omitted, only handlers which match the previous two will be removed
- * @returns {Delegate} This method is chainable
- */
-Delegate.prototype.off = function(eventType, selector, handler, useCapture) {
-  var i, listener, listenerMap, listenerList, singleEventType;
-
-  // Handler can be passed as
-  // the second or third argument
-  if (typeof selector === 'function') {
-    useCapture = handler;
-    handler = selector;
-    selector = null;
-  }
-
-  // If useCapture not set, remove
-  // all event listeners
-  if (useCapture === undefined) {
-    this.off(eventType, selector, handler, true);
-    this.off(eventType, selector, handler, false);
-    return this;
-  }
-
-  listenerMap = this.listenerMap[useCapture ? 1 : 0];
-  if (!eventType) {
-    for (singleEventType in listenerMap) {
-      if (listenerMap.hasOwnProperty(singleEventType)) {
-        this.off(singleEventType, selector, handler);
-      }
-    }
-
-    return this;
-  }
-
-  listenerList = listenerMap[eventType];
-  if (!listenerList || !listenerList.length) {
-    return this;
-  }
-
-  // Remove only parameter matches
-  // if specified
-  for (i = listenerList.length - 1; i >= 0; i--) {
-    listener = listenerList[i];
-
-    if ((!selector || selector === listener.selector) && (!handler || handler === listener.handler)) {
-      listenerList.splice(i, 1);
-    }
-  }
-
-  // All listeners removed
-  if (!listenerList.length) {
-    delete listenerMap[eventType];
-
-    // Remove the main handler
-    if (this.rootElement) {
-      this.rootElement.removeEventListener(eventType, this.handle, useCapture);
-    }
-  }
-
-  return this;
-};
-
-
-/**
- * Handle an arbitrary event.
- *
- * @param {Event} event
- */
-Delegate.prototype.handle = function(event) {
-  var i, l, type = event.type, root, phase, listener, returned, listenerList = [], target, /** @const */ EVENTIGNORE = 'ftLabsDelegateIgnore';
-
-  if (event[EVENTIGNORE] === true) {
-    return;
-  }
-
-  target = event.target;
-
-  // Hardcode value of Node.TEXT_NODE
-  // as not defined in IE8
-  if (target.nodeType === 3) {
-    target = target.parentNode;
-  }
-
-  root = this.rootElement;
-
-  phase = event.eventPhase || ( event.target !== event.currentTarget ? 3 : 2 );
-  
-  switch (phase) {
-    case 1: //Event.CAPTURING_PHASE:
-      listenerList = this.listenerMap[1][type];
-    break;
-    case 2: //Event.AT_TARGET:
-      if (this.listenerMap[0] && this.listenerMap[0][type]) listenerList = listenerList.concat(this.listenerMap[0][type]);
-      if (this.listenerMap[1] && this.listenerMap[1][type]) listenerList = listenerList.concat(this.listenerMap[1][type]);
-    break;
-    case 3: //Event.BUBBLING_PHASE:
-      listenerList = this.listenerMap[0][type];
-    break;
-  }
-
-  // Need to continuously check
-  // that the specific list is
-  // still populated in case one
-  // of the callbacks actually
-  // causes the list to be destroyed.
-  l = listenerList.length;
-  while (target && l) {
-    for (i = 0; i < l; i++) {
-      listener = listenerList[i];
-
-      // Bail from this loop if
-      // the length changed and
-      // no more listeners are
-      // defined between i and l.
-      if (!listener) {
-        break;
-      }
-
-      // Check for match and fire
-      // the event if there's one
-      //
-      // TODO:MCG:20120117: Need a way
-      // to check if event#stopImmediatePropagation
-      // was called. If so, break both loops.
-      if (listener.matcher.call(target, listener.matcherParam, target)) {
-        returned = this.fire(event, target, listener);
-      }
-
-      // Stop propagation to subsequent
-      // callbacks if the callback returned
-      // false
-      if (returned === false) {
-        event[EVENTIGNORE] = true;
-        event.preventDefault();
-        return;
-      }
-    }
-
-    // TODO:MCG:20120117: Need a way to
-    // check if event#stopPropagation
-    // was called. If so, break looping
-    // through the DOM. Stop if the
-    // delegation root has been reached
-    if (target === root) {
-      break;
-    }
-
-    l = listenerList.length;
-    target = target.parentElement;
-  }
-};
-
-/**
- * Fire a listener on a target.
- *
- * @param {Event} event
- * @param {Node} target
- * @param {Object} listener
- * @returns {boolean}
- */
-Delegate.prototype.fire = function(event, target, listener) {
-  return listener.handler.call(target, event, target);
-};
-
-/**
- * Check whether an element
- * matches a generic selector.
- *
- * @type function()
- * @param {string} selector A CSS selector
- */
-var matches = (function(el) {
-  if (!el) return;
-  var p = el.prototype;
-  return (p.matches || p.matchesSelector || p.webkitMatchesSelector || p.mozMatchesSelector || p.msMatchesSelector || p.oMatchesSelector);
-}(Element));
-
-/**
- * Check whether an element
- * matches a tag selector.
- *
- * Tags are NOT case-sensitive,
- * except in XML (and XML-based
- * languages such as XHTML).
- *
- * @param {string} tagName The tag name to test against
- * @param {Element} element The element to test with
- * @returns boolean
- */
-function matchesTag(tagName, element) {
-  return tagName.toLowerCase() === element.tagName.toLowerCase();
-}
-
-/**
- * Check whether an element
- * matches the root.
- *
- * @param {?String} selector In this case this is always passed through as null and not used
- * @param {Element} element The element to test with
- * @returns boolean
- */
-function matchesRoot(selector, element) {
-  /*jshint validthis:true*/
-  if (this.rootElement === window) return element === document;
-  return this.rootElement === element;
-}
-
-/**
- * Check whether the ID of
- * the element in 'this'
- * matches the given ID.
- *
- * IDs are case-sensitive.
- *
- * @param {string} id The ID to test against
- * @param {Element} element The element to test with
- * @returns boolean
- */
-function matchesId(id, element) {
-  return id === element.id;
-}
-
-/**
- * Short hand for off()
- * and root(), ie both
- * with no parameters
- *
- * @return void
- */
-Delegate.prototype.destroy = function() {
-  this.off();
-  this.root();
-};
-
-},{}],6:[function(require,module,exports){
-/*jshint browser:true, node:true*/
-
-'use strict';
-
-/**
- * @preserve Create and manage a DOM event delegator.
- *
- * @version 0.3.0
- * @codingstandard ftlabs-jsv2
- * @copyright The Financial Times Limited [All Rights Reserved]
- * @license MIT License (see LICENSE.txt)
- */
-var Delegate = require('./delegate');
-
-module.exports = function(root) {
-  return new Delegate(root);
-};
-
-module.exports.Delegate = Delegate;
-
-},{"./delegate":5}],7:[function(require,module,exports){
+},{}],3:[function(require,module,exports){
 /*!
   * domready (c) Dustin Diaz 2012 - License MIT
   */
@@ -884,138 +268,12 @@ module.exports.Delegate = Delegate;
     })
 })
 
-},{}],8:[function(require,module,exports){
-var ERROR_MESSAGE = 'Function.prototype.bind called on incompatible ';
-var slice = Array.prototype.slice;
-var toStr = Object.prototype.toString;
-var funcType = '[object Function]';
-
-module.exports = function bind(that) {
-    var target = this;
-    if (typeof target !== 'function' || toStr.call(target) !== funcType) {
-        throw new TypeError(ERROR_MESSAGE + target);
-    }
-    var args = slice.call(arguments, 1);
-
-    var binder = function () {
-        if (this instanceof bound) {
-            var result = target.apply(
-                this,
-                args.concat(slice.call(arguments))
-            );
-            if (Object(result) === result) {
-                return result;
-            }
-            return this;
-        } else {
-            return target.apply(
-                that,
-                args.concat(slice.call(arguments))
-            );
-        }
-    };
-
-    var boundLength = Math.max(0, target.length - args.length);
-    var boundArgs = [];
-    for (var i = 0; i < boundLength; i++) {
-        boundArgs.push('$' + i);
-    }
-
-    var bound = Function('binder', 'return function (' + boundArgs.join(',') + '){ return binder.apply(this,arguments); }')(binder);
-
-    if (target.prototype) {
-        var Empty = function Empty() {};
-        Empty.prototype = target.prototype;
-        bound.prototype = new Empty();
-        Empty.prototype = null;
-    }
-
-    return bound;
-};
-
-
-},{}],9:[function(require,module,exports){
-/* jshint bitwise: false */
-
-// Production steps of ECMA-262, Edition 5, 15.4.4.14
-// Reference: http://es5.github.io/#x15.4.4.14
-if (!Array.prototype.indexOf) {
-  Array.prototype.indexOf = function(searchElement, fromIndex) {
-
-    var k;
-
-    // 1. Let O be the result of calling ToObject passing
-    //    the this value as the argument.
-    if (this === null) {
-      throw new TypeError('"this" is null or not defined');
-    }
-
-    var O = Object(this);
-
-    // 2. Let lenValue be the result of calling the Get
-    //    internal method of O with the argument "length".
-    // 3. Let len be ToUint32(lenValue).
-    var len = O.length >>> 0;
-
-    // 4. If len is 0, return -1.
-    if (len === 0) {
-      return -1;
-    }
-
-    // 5. If argument fromIndex was passed let n be
-    //    ToInteger(fromIndex); else let n be 0.
-    var n = +fromIndex || 0;
-
-    if (Math.abs(n) === Infinity) {
-      n = 0;
-    }
-
-    // 6. If n >= len, return -1.
-    if (n >= len) {
-      return -1;
-    }
-
-    // 7. If n >= 0, then Let k be n.
-    // 8. Else, n<0, Let k be len - abs(n).
-    //    If k is less than 0, then let k be 0.
-    k = Math.max(n >= 0 ? n : len - Math.abs(n), 0);
-
-    // 9. Repeat, while k < len
-    while (k < len) {
-      // a. Let Pk be ToString(k).
-      //   This is implicit for LHS operands of the in operator
-      // b. Let kPresent be the result of calling the
-      //    HasProperty internal method of O with argument Pk.
-      //   This step can be combined with c
-      // c. If kPresent is true, then
-      //    i.  Let elementK be the result of calling the Get
-      //        internal method of O with the argument ToString(k).
-      //   ii.  Let same be the result of applying the
-      //        Strict Equality Comparison Algorithm to
-      //        searchElement and elementK.
-      //  iii.  If same is true, return k.
-      if (k in O && O[k] === searchElement) {
-        return k;
-      }
-      k++;
-    }
-    return -1;
-  };
-}
-
-},{}],10:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 (function(exports, undefined) {
-
-  // Some polyfills & shims.
-  require('eventlistener-polyfill');
-  require('prototype-indexof-shim');
-  var forEach = require('array-foreach');
-  Function.prototype.bind = require('function-bind');
 
   // Other dependencies.
   var aug = require('aug');
   var Cookies = require('cookies-js');
-  var Delegate = require('dom-delegate');
   var domReady = require('domready');
 
   /**
@@ -1134,28 +392,26 @@ if (!Array.prototype.indexOf) {
   /**
    * Launch events on page interaction.
    */
-  function validateByClick() {
-    ic.delegate = new Delegate(document);
-    // Specify the listener targets one by one to retain old IE8 compatibility.
-    ic.delegate.on('click', 'a', validateByClickHandler);
-    ic.delegate.on('click', 'button', validateByClickHandler);
-    ic.delegate.on('click', 'input', validateByClickHandler);
+  function validateByClick(wrapper) {
+    wrapper.addEventListener('click', validateByClickHandler);
   }
 
   /**
    * Event handler to monitor page interaction and perform acknowledgement if
    * needed.
    */
-  function validateByClickHandler() {
-    switch (this.tagName) {
+  function validateByClickHandler(e) {
+    var target = e.target;
+
+    switch (target.tagName) {
       case 'A':
-        if (!!this.href.match(/^#/) || !!this.href.match(/^\//) || !!this.href.match(hostnamePattern)) {
+        if (!!target.href.match(/^#/) || !!target.href.match(/^\//) || !!target.href.match(hostnamePattern)) {
           return agree();
         }
         break;
 
       case 'INPUT':
-        if (this.type === 'submit') {
+        if (target.type === 'submit') {
           return agree();
         }
         break;
@@ -1163,13 +419,6 @@ if (!Array.prototype.indexOf) {
       case 'BUTTON':
         return agree();
     }
-  }
-
-  /**
-   * Close button click handler.
-   */
-  function buttonHandler() {
-    agree();
   }
 
   /**
@@ -1194,7 +443,6 @@ if (!Array.prototype.indexOf) {
     var wrapper = document.createElement('div');
     var container = document.createElement('div');
     var body = document.body;
-    var activeButton;
 
     // Embed styles.
     s.type = 'text/css';
@@ -1246,13 +494,12 @@ if (!Array.prototype.indexOf) {
     body = document.body;
     body.insertBefore(wrapper, body.firstChild);
 
-    // Set up click listener on the notice button.
-    activeButton = document.querySelector('#__ic-continue-button');
-    activeButton.addEventListener('click', buttonHandler);
-
     // Add validate by click if set.
     if (config.validateByClick) {
-      validateByClick();
+      validateByClick(wrapper);
+    } else {
+      var activeButton = document.getElementById('__ic-continue-button');
+      activeButton.addEventListener('click', agree);
     }
 
     ic.status = true;
@@ -1262,12 +509,8 @@ if (!Array.prototype.indexOf) {
    * Remove any event listeners set and the notice container.
    */
   function destroy() {
-    var button = document.querySelector('#__ic-continue-button');
-    button.removeEventListener('click', buttonHandler);
-    ic.delegate && ic.delegate.destroy();
-
     // Destroy notice element.
-    var el = document.querySelector('#__ic-notice-container');
+    var el = document.getElementById('__ic-notice-container');
     el.parentElement.removeChild(el);
     ic.status = false;
   }
@@ -1301,7 +544,9 @@ if (!Array.prototype.indexOf) {
 
     // Process initial queue items.
     if (queue instanceof Array) {
-      forEach(queue, root.impliedConsent.q.push);
+      for (var i = 0; i < queue.length; i++) { 
+        root.impliedConsent.q.push(queue[i]);
+      }
     }
   }
 
@@ -1311,5 +556,5 @@ if (!Array.prototype.indexOf) {
 
 }(typeof exports === 'object' && exports || this));
 
-},{"array-foreach":2,"aug":3,"cookies-js":4,"dom-delegate":6,"domready":7,"eventlistener-polyfill":1,"function-bind":8,"prototype-indexof-shim":9}]},{},[10]);
+},{"aug":1,"cookies-js":2,"domready":3}]},{},[4]);
 }));

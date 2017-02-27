@@ -1,15 +1,8 @@
 (function(exports, undefined) {
 
-  // Some polyfills & shims.
-  require('eventlistener-polyfill');
-  require('prototype-indexof-shim');
-  var forEach = require('array-foreach');
-  Function.prototype.bind = require('function-bind');
-
   // Other dependencies.
   var aug = require('aug');
   var Cookies = require('cookies-js');
-  var Delegate = require('dom-delegate');
   var domReady = require('domready');
 
   /**
@@ -128,28 +121,26 @@
   /**
    * Launch events on page interaction.
    */
-  function validateByClick() {
-    ic.delegate = new Delegate(document);
-    // Specify the listener targets one by one to retain old IE8 compatibility.
-    ic.delegate.on('click', 'a', validateByClickHandler);
-    ic.delegate.on('click', 'button', validateByClickHandler);
-    ic.delegate.on('click', 'input', validateByClickHandler);
+  function validateByClick(wrapper) {
+    wrapper.addEventListener('click', validateByClickHandler);
   }
 
   /**
    * Event handler to monitor page interaction and perform acknowledgement if
    * needed.
    */
-  function validateByClickHandler() {
-    switch (this.tagName) {
+  function validateByClickHandler(e) {
+    var target = e.target;
+
+    switch (target.tagName) {
       case 'A':
-        if (!!this.href.match(/^#/) || !!this.href.match(/^\//) || !!this.href.match(hostnamePattern)) {
+        if (!!target.href.match(/^#/) || !!target.href.match(/^\//) || !!target.href.match(hostnamePattern)) {
           return agree();
         }
         break;
 
       case 'INPUT':
-        if (this.type === 'submit') {
+        if (target.type === 'submit') {
           return agree();
         }
         break;
@@ -157,13 +148,6 @@
       case 'BUTTON':
         return agree();
     }
-  }
-
-  /**
-   * Close button click handler.
-   */
-  function buttonHandler() {
-    agree();
   }
 
   /**
@@ -188,7 +172,6 @@
     var wrapper = document.createElement('div');
     var container = document.createElement('div');
     var body = document.body;
-    var activeButton;
 
     // Embed styles.
     s.type = 'text/css';
@@ -240,13 +223,12 @@
     body = document.body;
     body.insertBefore(wrapper, body.firstChild);
 
-    // Set up click listener on the notice button.
-    activeButton = document.querySelector('#__ic-continue-button');
-    activeButton.addEventListener('click', buttonHandler);
-
     // Add validate by click if set.
     if (config.validateByClick) {
-      validateByClick();
+      validateByClick(wrapper);
+    } else {
+      var activeButton = document.getElementById('__ic-continue-button');
+      activeButton.addEventListener('click', agree);
     }
 
     ic.status = true;
@@ -256,12 +238,8 @@
    * Remove any event listeners set and the notice container.
    */
   function destroy() {
-    var button = document.querySelector('#__ic-continue-button');
-    button.removeEventListener('click', buttonHandler);
-    ic.delegate && ic.delegate.destroy();
-
     // Destroy notice element.
-    var el = document.querySelector('#__ic-notice-container');
+    var el = document.getElementById('__ic-notice-container');
     el.parentElement.removeChild(el);
     ic.status = false;
   }
@@ -295,7 +273,9 @@
 
     // Process initial queue items.
     if (queue instanceof Array) {
-      forEach(queue, root.impliedConsent.q.push);
+      for (var i = 0; i < queue.length; i++) { 
+        root.impliedConsent.q.push(queue[i]);
+      }
     }
   }
 
