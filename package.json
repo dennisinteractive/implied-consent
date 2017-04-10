@@ -2,7 +2,7 @@
   "name": "implied-consent",
   "description": "a Cookie Notice plugin",
   "private": true,
-  "version": "1.1.0",
+  "version": "1.1.1",
   "license": "MIT",
   "main": "implied-consent.min.js",
   "ignore": [
