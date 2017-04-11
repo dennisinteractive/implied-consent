@@ -122,7 +122,32 @@
    * Launch events on page interaction.
    */
   function validateByClick(wrapper) {
-    wrapper.addEventListener('click', validateByClickHandler);
+    wrapper.addEventListener('click', validateByClickHandler, {
+      passive: true
+    });
+
+    document.body.addEventListener('click', icDelegate, {
+      passive: true
+    });
+  }
+
+
+  function icDelegate(e) {
+    var clickElements = ['A', 'BUTTON', 'INPUT'];
+
+    if (clickElements.indexOf(e.target.tagName) >= 0) {
+      validateByClickHandler(e);
+    } else {
+      var parent = e.target;
+      while (parent.parentNode) {
+        parent = parent.parentNode;
+
+        if (clickElements.indexOf(parent.tagName) >= 0) {
+          validateByClickHandler({ target: parent });
+          break;
+        }
+      }
+    }
   }
 
   /**
@@ -242,6 +267,10 @@
     var el = document.getElementById('__ic-notice-container');
     el.parentElement.removeChild(el);
     ic.status = false;
+
+    document.body.removeEventListener('click', icDelegate, {
+      passive: true
+    });
   }
 
   /**
