@@ -13,9 +13,8 @@ as it is loaded and initialised in an asynchronous fashion.
 dependencies. It weighs only 5.38 kB when minified and gzipped.
 * __Browser support__: This has been tested on IE9+ and all recent modern browsers.
 
-## v1.1.0 Changes
-In this version, legacy polyfills for older browsers (IE8 and below) were removed to reduce file size and 
-prevent the polyfills from interfering with native browser APIs.
+## v1.2.0 Changes
+In this version, functionality has been added that removes the cookie notice once the viewer has navigated to a different page.
 
 ## Installation / Usage
 
